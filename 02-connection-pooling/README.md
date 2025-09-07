@@ -1,4 +1,4 @@
-# Database Connection Pooling
+# Database Connection Pooling using **bounded blocking queue**
 
 ## Overview
 
@@ -43,6 +43,25 @@ With Pooling:
   (Pool maintains connections)
   Client → Get Connection from Pool → Use Connection → Return to Pool → Get Next Connection...
 ```
+
+### Bounded Blocking Queue
+
+Our connection pool implementation uses a **bounded blocking queue**, which has two important characteristics:
+
+1. **Bounded**: The queue has a maximum capacity (defined by pool_size)
+   - Prevents creating too many connections
+   - Controls resource consumption
+   - Creates a natural upper limit aligned with hardware capabilities
+
+2. **Blocking**: The queue automatically handles waiting threads
+   - When a thread requests a connection from an empty pool, it waits until one becomes available
+   - If trying to return a connection to a full pool (rare), it would wait until space is available
+   - This creates natural flow control without explicit synchronization code
+
+This approach provides:
+- **Thread safety**: Multiple threads can request/return connections concurrently
+- **Resource control**: Prevents connection explosion under high load
+- **Simplicity**: Complex synchronization is handled by the queue implementation
 
 ### Pseudocode Implementation
 
